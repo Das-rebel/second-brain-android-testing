@@ -2,19 +2,20 @@
 buildscript {
     ext {
         // Kotlin
-        kotlin_version = '1.9.25'
+        kotlin_version = '1.9.22'  // Using a slightly older stable version
         kotlin_serialization_version = '1.6.0'
         
         // Android
-        agp_version = '8.7.0'
+        agp_version = '8.2.2'  // Current stable version
         
         // DI
-        hilt_version = '2.52'
+        hilt_version = '2.50'  // Using a stable version known to work well with Kotlin 1.9.x
+        hilt_androidx_version = '1.1.0'  // For androidx.hilt components
         
         // Database
         room_version = '2.6.1'
         
-        // Compose
+        // Compose - using the same version as the BOM
         compose_compiler_version = '1.5.1'
         
         // Network
@@ -34,16 +35,39 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+        // JUnit 5 support
+        classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.9.3.0'
+    }
+}
+
+// Common test configuration
+subprojects {
+    // Apply JUnit 5 plugin to all modules
+    apply plugin: 'de.mannodermaus.android-junit5'
+    
+    // Configure test tasks
+    tasks.withType(Test) {
+        useJUnitPlatform()
+        
+        // Set JVM arguments for tests
+        jvmArgs '-XX:MaxPermSize=512m', '-XX:+HeapDumpOnOutOfMemoryError'
+        
+        // Enable parallel test execution
+        maxParallelForks = Runtime.runtime.availableProcessors() > 1 ? 2 : 1
+        
+        // Fail the 'test' task on the first test failure
+        failFast = true
+        
+        // Show standard out and standard error of the test JVM(s) on the console
+        testLogging {
+            events 'passed', 'skipped', 'failed'
+            showStandardStreams = true
+            exceptionFormat 'full'
+        }
     }
 }
 
 allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
-    }
-    
     // Enable experimental APIs for all modules
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
         kotlinOptions {

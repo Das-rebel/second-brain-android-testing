@@ -35,6 +35,40 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            testCoverageEnabled true
+            // Enable code coverage for all build variants
+            enableUnitTestCoverage true
+            enableAndroidTestCoverage true
+        }
+    }
+    
+    // Test options
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            returnDefaultValues = true
+            all {
+                // Enable test parallelization
+                maxParallelForks = Runtime.runtime.availableProcessors()
+                // Enable JUnit 5
+                useJUnitPlatform()
+                // Set memory settings
+                jvmArgs '-Xmx2g', '-XX:MaxMetaspaceSize=1g'
+                
+                // Enable test coverage
+                jacoco {
+                    includeNoLocationClasses = true
+                    excludes = ['jdk.internal.*']
+                }
+            }
+        }
+        
+        // Use test orchestrator for instrumented tests
+        animationsDisabled = false
+        
+        // Configure test execution
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
     
     compileOptions {
@@ -62,6 +96,14 @@ android {
     }
 }
 
+// Configure KAPT for Hilt before dependencies
+kapt {
+    correctErrorTypes = true
+    arguments {
+        arg("dagger.fastInit", "ENABLED")
+    }
+}
+
 dependencies {
     // Core Android
     implementation 'androidx.core:core-ktx:1.12.0'
@@ -84,7 +126,16 @@ dependencies {
     // Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
-    implementation 'androidx.hilt:hilt-navigation-compose:1.1.0'
+    kapt "androidx.hilt:hilt-compiler:$hilt_androidx_version"
+    implementation "androidx.hilt:hilt-navigation-compose:$hilt_androidx_version"
+    
+    // For instrumentation tests
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hilt_version"
+    
+    // For local unit tests
+    testImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kaptTest "com.google.dagger:hilt-android-compiler:$hilt_version"
     
     // Room
     implementation "androidx.room:room-runtime:$room_version"
@@ -122,25 +173,50 @@ dependencies {
     implementation 'androidx.hilt:hilt-work:1.1.0'
     kapt 'androidx.hilt:hilt-compiler:1.1.0'
     
-    // Testing
+    // Testing - Unit Tests
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation 'io.mockk:mockk:1.13.8'
-    testImplementation 'io.mockk:mockk-android:1.13.8'
     testImplementation 'app.cash.turbine:turbine:1.0.0'
+    testImplementation 'com.google.truth:truth:1.1.5'
     
+    // Hilt Testing
+    testImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kaptTest "com.google.dagger:hilt-android-compiler:$hilt_version"
+    
+    // AndroidX Test - Instrumented Testing
+    def androidx_test_version = '1.5.2'
+    androidTestImplementation "androidx.test:core-ktx:1.5.0"
+    androidTestImplementation "androidx.test:runner:$androidx_test_version"
+    androidTestImplementation "androidx.test:rules:$androidx_test_version"
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.5.1'
+    
+    // Compose Testing
     androidTestImplementation platform('androidx.compose:compose-bom:2024.02.00')
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     androidTestImplementation 'androidx.compose.ui:ui-test-manifest'
-    androidTestImplementation 'androidx.test:rules:1.5.0'
-    androidTestImplementation 'androidx.test:runner:1.5.2'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    
+    // Navigation Testing
     androidTestImplementation 'androidx.navigation:navigation-testing:2.7.7'
-    androidTestImplementation 'androidx.hilt:hilt-android-testing:1.1.0'
+    
+    // Hilt Instrumented Testing
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hilt_version"
+    
+    // MockK for Instrumented Tests
     androidTestImplementation 'io.mockk:mockk-android:1.13.8'
     
-    debugImplementation 'androidx.compose.ui:ui-tooling'
-    debugImplementation 'androidx.compose.ui:ui-test-manager'
+    // Test Orchestrator
+    androidTestUtil 'androidx.test:orchestrator:1.4.2'
+    
+    // Fragment Testing
+    def fragment_version = '1.7.0'
+    debugImplementation "androidx.fragment:fragment-testing:$fragment_version"
+    
+    // WorkManager Testing
+    androidTestImplementation 'androidx.work:work-testing:2.9.0'
 }
