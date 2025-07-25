@@ -1,0 +1,798 @@
+package com.secondbrain.app.ui.bookmark
+
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Sort
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.Unarchive
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.google.accompanist.flowlayout.FlowRow
+import com.google.accompanist.flowlayout.MainAxisAlignment
+import com.secondbrain.app.R
+import com.secondbrain.app.domain.model.Bookmark
+import com.secondbrain.app.domain.model.BookmarkFilter
+import com.secondbrain.app.domain.model.BookmarkSortOption
+import com.secondbrain.app.domain.model.BookmarkSortOrder
+import com.secondbrain.app.domain.model.BookmarkState
+import com.secondbrain.app.domain.model.Tag
+import com.secondbrain.app.ui.components.BookmarkList
+import com.secondbrain.app.ui.components.BookmarkSearchBar
+import com.secondbrain.app.ui.components.BottomBar
+import com.secondbrain.app.ui.components.FilterChip
+import com.secondbrain.app.ui.components.FloatingActionButtonWithIcon
+import com.secondbrain.app.ui.components.LoadingIndicator
+import com.secondbrain.app.ui.components.NoBookmarksPlaceholder
+import com.secondbrain.app.ui.components.SearchBar
+import com.secondbrain.app.ui.components.SelectionTopAppBar
+import com.secondbrain.app.ui.components.SortMenu
+import com.secondbrain.app.ui.theme.spacing
+import com.secondbrain.app.ui.utils.showBulkDeleteConfirmationDialog
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import java.net.URL
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+@Composable
+fun BookmarkListScreen(
+    viewModel: BookmarkViewModel = hiltViewModel(),
+    onNavigateToBookmark: (Long) -> Unit = {},
+    onNavigateToAddBookmark: () -> {},
+    windowSizeClass: WindowSizeClass,
+    modifier: Modifier = Modifier
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    
+    // Handle side effects
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is BookmarkEvent.NavigateToBookmark -> onNavigateToBookmark(event.bookmarkId)
+                is BookmarkEvent.ShowMessage -> {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+                is BookmarkEvent.ShowError -> {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            duration = SnackbarDuration.Long
+                        )
+                    }
+                }
+                is BookmarkEvent.NavigateToEditBookmark -> {
+                    // Handle navigation to edit screen if needed
+                }
+                is BookmarkEvent.ShareBookmark -> {
+                    // Handle sharing if needed
+                }
+            }
+        }
+    }
+    
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            if (uiState.isSelectionMode) {
+                SelectionTopAppBar(
+                    selectedCount = uiState.selectedBookmarkIds.size,
+                    onSelectAll = { 
+                        if (uiState.selectedBookmarkIds.size == uiState.filteredBookmarks.size) {
+                            viewModel.handleAction(BookmarkAction.ClearSelection)
+                        } else {
+                            viewModel.handleAction(BookmarkAction.ToggleSelectAll)
+                        }
+                    },
+                    onCancel = { viewModel.handleAction(BookmarkAction.CancelSelection) },
+                    actions = {
+                        // Favorite/Unfavorite
+                        BulkActionButton(
+                            icon = if (uiState.selectedBookmarks.all { it.isFavorite }) {
+                                Icons.Outlined.Favorite
+                            } else {
+                                Icons.Outlined.FavoriteBorder
+                            },
+                            contentDescription = if (uiState.selectedBookmarks.all { it.isFavorite }) {
+                                stringResource(R.string.action_unfavorite)
+                            } else {
+                                stringResource(R.string.action_favorite)
+                            },
+                            onClick = {
+                                viewModel.handleAction(
+                                    BookmarkAction.PerformBulkAction(
+                                        if (uiState.selectedBookmarks.all { it.isFavorite }) {
+                                            BulkAction.Unfavorite
+                                        } else {
+                                            BulkAction.Favorite
+                                        }
+                                    )
+                                )
+                            }
+                        )
+                        
+                        // Archive/Unarchive
+                        BulkActionButton(
+                            icon = if (uiState.selectedBookmarks.all { it.isArchived }) {
+                                Icons.Outlined.Unarchive
+                            } else {
+                                Icons.Outlined.Archive
+                            },
+                            contentDescription = if (uiState.selectedBookmarks.all { it.isArchived }) {
+                                stringResource(R.string.action_unarchive)
+                            } else {
+                                stringResource(R.string.action_archive)
+                            },
+                            onClick = {
+                                viewModel.handleAction(
+                                    BookmarkAction.PerformBulkAction(
+                                        if (uiState.selectedBookmarks.all { it.isArchived }) {
+                                            BulkAction.Unarchive
+                                        } else {
+                                            BulkAction.Archive
+                                        }
+                                    )
+                                )
+                            }
+                        )
+                        
+                        // Delete
+                        BulkActionButton(
+                            icon = Icons.Outlined.Delete,
+                            contentDescription = stringResource(R.string.action_delete),
+                            onClick = {
+                                scope.launch {
+                                    val confirmed = showBulkDeleteConfirmationDialog(
+                                        context = context,
+                                        count = uiState.selectedBookmarkIds.size
+                                    )
+                                    if (confirmed) {
+                                        viewModel.handleAction(
+                                            BookmarkAction.PerformBulkAction(BulkAction.Delete)
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
+                )
+            } else {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.bookmarks)) },
+                    actions = {
+                        IconButton(onClick = { viewModel.handleAction(BookmarkAction.StartSelection) }) {
+                            Icon(
+                                imageVector = Icons.Outlined.SelectAll,
+                                contentDescription = stringResource(R.string.select)
+                            )
+                        }
+                        IconButton(onClick = onNavigateToAddBookmark) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(R.string.add_bookmark)
+                            )
+                        }
+                    }
+                )
+            }
+        },
+        modifier = modifier
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(48.dp)
+                    )
+                }
+                uiState.filteredBookmarks.isEmpty() -> {
+                    EmptyBookmarks(
+                        onAddBookmark = onNavigateToAddBookmark,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                else -> {
+                    BookmarkList(
+                        bookmarks = uiState.filteredBookmarks,
+                        onToggleFavorite = { bookmark ->
+                            viewModel.handleAction(
+                                BookmarkAction.ToggleFavorite(bookmark.id, !bookmark.isFavorite)
+                            )
+                        },
+                        onToggleArchive = { bookmark ->
+                            viewModel.handleAction(
+                                BookmarkAction.ToggleArchive(bookmark.id, !bookmark.isArchived)
+                            )
+                        },
+                        onDeleteBookmark = { bookmark ->
+                            scope.launch {
+                                val confirmed = showBulkDeleteConfirmationDialog(
+                                    context = context,
+                                    count = 1
+                                )
+                                if (confirmed) {
+                                    viewModel.handleAction(BookmarkAction.Delete(bookmark.id))
+                                }
+                            }
+                        },
+                        onShareBookmark = { bookmark ->
+                            viewModel.handleAction(BookmarkAction.Share(bookmark.id))
+                        },
+                        onEditBookmark = { bookmark ->
+                            viewModel.handleAction(BookmarkAction.Edit(bookmark.id))
+                        },
+                        onBookmarkClick = { bookmark ->
+                            if (uiState.isSelectionMode) {
+                                viewModel.handleAction(BookmarkAction.ToggleSelect(bookmark.id))
+                            } else {
+                                viewModel.handleAction(BookmarkAction.Open(bookmark.id))
+                            }
+                        },
+                        onBookmarkLongClick = { bookmark ->
+                            viewModel.handleAction(BookmarkAction.StartSelection)
+                            viewModel.handleAction(BookmarkAction.ToggleSelect(bookmark.id))
+                        },
+                        isSelectionMode = uiState.isSelectionMode,
+                        selectedBookmarkIds = uiState.selectedBookmarkIds,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+            
+            // Show error message if any
+            uiState.error?.let { error ->
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BookmarkList(
+    bookmarks: List<Bookmark>,
+    onToggleFavorite: (Bookmark) -> Unit,
+    onToggleArchive: (Bookmark) -> Unit,
+    onDeleteBookmark: (Bookmark) -> Unit,
+    onShareBookmark: (Bookmark) -> Unit,
+    onEditBookmark: (Bookmark) -> Unit,
+    onBookmarkClick: (Bookmark) -> Unit = {},
+    onBookmarkLongClick: (Bookmark) -> Unit = {},
+    isSelectionMode: Boolean = false,
+    selectedBookmarkIds: Set<Long> = emptySet(),
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = MaterialTheme.spacing.small),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+    ) {
+        items(bookmarks, key = { it.id }) { bookmark ->
+            val isSelected = selectedBookmarkIds.contains(bookmark.id)
+            
+            BookmarkItem(
+                bookmark = bookmark,
+                onClick = { onBookmarkClick(bookmark) },
+                onLongClick = { onBookmarkLongClick(bookmark) },
+                onToggleFavorite = { onToggleFavorite(bookmark) },
+                onToggleArchive = { onToggleArchive(bookmark) },
+                onDelete = { onDeleteBookmark(bookmark) },
+                onShare = { onShareBookmark(bookmark) },
+                onEdit = { onEditBookmark(bookmark) },
+                isSelected = isSelected,
+                isSelectionMode = isSelectionMode,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateItemPlacement()
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+fun BookmarkItem(
+    bookmark: Bookmark,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit = {},
+    onToggleFavorite: () -> Unit,
+    onToggleArchive: () -> Unit,
+    onDelete: (() -> Unit)? = null,
+    onShare: (() -> Unit)? = null,
+    onEdit: (() -> Unit)? = null,
+    isSelected: Boolean = false,
+    isSelectionMode: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
+    var showMenu by remember { mutableStateOf(false) }
+
+    // Card background color based on selection
+    val cardColor = if (isSelected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+
+    Card(
+        onClick = {
+            if (isSelectionMode) {
+                onLongClick()
+            } else {
+                onClick()
+            }
+        },
+        onLongClick = onLongClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = MaterialTheme.spacing.medium, vertical = MaterialTheme.spacing.small)
+            .animateContentSize(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(MaterialTheme.spacing.medium),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Selection checkbox
+            if (isSelectionMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onLongClick() },
+                    modifier = Modifier.padding(end = MaterialTheme.spacing.small)
+                )
+            }
+            
+            // Bookmark content
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = MaterialTheme.spacing.small)
+            ) {
+                // Title row
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // Favicon
+                    bookmark.faviconUrl?.let { faviconUrl ->
+                        AsyncImage(
+                            model = faviconUrl,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(end = 8.dp)
+                        )
+                    }
+                    
+                    // Title
+                    Text(
+                        text = bookmark.title.ifEmpty { "Untitled" },
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    // Favorite button
+                    IconButton(
+                        onClick = onToggleFavorite,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (bookmark.isFavorite) {
+                                Icons.Filled.Favorite
+                            } else {
+                                Icons.Outlined.FavoriteBorder
+                            },
+                            contentDescription = if (bookmark.isFavorite) {
+                                stringResource(R.string.action_unfavorite)
+                            } else {
+                                stringResource(R.string.action_favorite)
+                            },
+                            tint = if (bookmark.isFavorite) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        )
+                    }
+                }
+                
+                // URL
+                Text(
+                    text = bookmark.url,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+                
+                // Description (if available)
+                bookmark.description?.takeIf { it.isNotBlank() }?.let { description ->
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+                
+                // Tags (if available)
+                if (bookmark.tags.isNotEmpty()) {
+                    FlowRow(
+                        modifier = Modifier.padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        bookmark.tags.forEach { tag ->
+                            SuggestionChip(
+                                onClick = { /* Handle tag click */ },
+                                label = { Text(tag) },
+                                modifier = Modifier.height(24.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Menu button (only show when not in selection mode)
+            if (!isSelectionMode) {
+                Box(
+                    modifier = Modifier
+                        .wrapContentSize(Alignment.TopEnd)
+                ) {
+                    IconButton(
+                        onClick = { showMenu = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.MoreVert,
+                            contentDescription = stringResource(R.string.more_options)
+                        )
+                    }
+                    
+                    // Dropdown menu
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        // Edit option
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.edit)) },
+                            onClick = {
+                                onEdit?.invoke()
+                                showMenu = false
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Outlined.Edit,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        
+                        // Share option
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.share)) },
+                            onClick = {
+                                onShare?.invoke()
+                                showMenu = false
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Outlined.Share,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        
+                        // Copy link option
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.copy_link)) },
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString(bookmark.url))
+                                showMenu = false
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Outlined.ContentCopy,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        
+                        // Archive/Unarchive option
+                        DropdownMenuItem(
+                            text = {
+                                text = { 
+                                    Text(
+                                        stringResource(R.string.delete_bookmark),
+                                        color = MaterialTheme.colorScheme.error
+                                    ) 
+                                },
+                                onClick = {
+                                    showDeleteConfirmation = true
+                                    expanded = false
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Delete,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Description
+            if (bookmark.description.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+                Text(
+                    text = bookmark.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            
+            // Tags
+            if (bookmark.tags.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+                ) {
+                    val visibleTags = bookmark.tags.take(3)
+                    visibleTags.forEach { tag ->
+                        SuggestionChip(
+                            onClick = { 
+                                // Navigate to tag filter
+                                // viewModel.handleAction(BookmarkAction.FilterByTag(tag))
+                            },
+                            label = { 
+                                Text(
+                                    "#$tag",
+                                    style = MaterialTheme.typography.labelSmall
+                                ) 
+                            },
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
+                    
+                    if (bookmark.tags.size > 3) {
+                        Text(
+                            text = "+${bookmark.tags.size - 3} more",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+    
+    // Delete Confirmation Dialog
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text(stringResource(R.string.confirm_delete_bookmark)) },
+            text = { Text(stringResource(R.string.are_you_sure_delete_bookmark)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete?.invoke()
+                        showDeleteConfirmation = false
+                    }
+                ) {
+                    Text(
+                        stringResource(android.R.string.ok),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteConfirmation = false }
+                ) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            }
+        )
+    }
+    
+    // Show feedback when link is copied
+    if (showCopyConfirmation) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(4.dp),
+                shadowElevation = 4.dp
+            ) {
+                Text(
+                    text = stringResource(R.string.link_copied),
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyBookmarks(
+    onAddBookmark: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier.padding(24.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.no_bookmarks),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = stringResource(R.string.no_bookmarks_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Button(
+            onClick = onAddBookmark,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        ) {
+            Text(stringResource(R.string.add_bookmark))
+        }
+    }
+}

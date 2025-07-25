@@ -1,0 +1,118 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Project Setup",
+        "description": "Set up the basic project structure and configuration",
+        "status": "done",
+        "priority": "high",
+        "createdAt": "2025-07-25T04:30:00+05:30",
+        "updatedAt": "2025-07-25T04:30:00+05:30"
+      },
+      {
+        "id": 2,
+        "title": "Data Layer Implementation",
+        "description": "Implement the data layer with Room database and Retrofit",
+        "status": "done",
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 2.1,
+            "title": "Create Room Database",
+            "description": "Set up Room database with entities and DAOs",
+            "status": "done",
+            "priority": "high"
+          },
+          {
+            "id": 2.2,
+            "title": "Implement Network Layer",
+            "description": "Set up Retrofit for API calls",
+            "status": "done",
+            "priority": "high"
+          },
+          {
+            "id": 2.3,
+            "title": "Create Repository Implementation",
+            "description": "Implement CollectionRepository with caching and offline support",
+            "status": "done",
+            "priority": "high"
+          }
+        ],
+        "createdAt": "2025-07-25T04:30:00+05:30",
+        "updatedAt": "2025-07-25T04:30:00+05:30"
+      },
+      {
+        "id": 3,
+        "title": "Domain Layer Implementation",
+        "description": "Implement use cases and business logic",
+        "status": "done",
+        "priority": "medium",
+        "createdAt": "2025-07-25T04:30:00+05:30",
+        "updatedAt": "2025-07-25T04:30:00+05:30"
+      },
+      {
+        "id": 4,
+        "title": "UI Layer Implementation",
+        "description": "Implement UI components and screens",
+        "status": "done",
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 4.1,
+            "title": "Design Theme and Components",
+            "description": "Create theme, colors, typography, and reusable components",
+            "status": "done",
+            "priority": "high"
+          },
+          {
+            "id": 4.2,
+            "title": "Implement Collection List Screen",
+            "description": "Create the main screen showing the list of collections",
+            "status": "done",
+            "priority": "high"
+          },
+          {
+            "id": 4.3,
+            "title": "Implement Collection Detail Screen",
+            "description": "Create the screen showing collection details and items",
+            "status": "done",
+            "priority": "high"
+          },
+          {
+            "id": 4.4,
+            "title": "Implement Sharing UI",
+            "description": "Create UI for sharing collections",
+            "status": "done",
+            "priority": "medium"
+          }
+        ],
+        "createdAt": "2025-07-25T04:30:00+05:30",
+        "updatedAt": "2025-07-25T04:30:00+05:30"
+      },
+      {
+        "id": 5,
+        "title": "Testing",
+        "description": "Write unit and instrumentation tests",
+        "status": "done",
+        "priority": "medium",
+        "createdAt": "2025-07-25T04:30:00+05:30",
+        "updatedAt": "2025-07-25T04:30:00+05:30"
+      },
+      {
+        "id": 6,
+        "title": "Deployment",
+        "description": "Prepare for app store deployment",
+        "status": "todo",
+        "priority": "low",
+        "createdAt": "2025-07-25T04:30:00+05:30",
+        "updatedAt": "2025-07-25T04:30:00+05:30"
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-25T00:03:09.598Z",
+      "updated": "2025-07-25T12:33:52.676Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

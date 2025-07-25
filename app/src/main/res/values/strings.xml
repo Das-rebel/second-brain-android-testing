@@ -1,0 +1,123 @@
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Second Brain</string>
+    
+    <!-- Common -->
+    <string name="hello_world">Hello World!</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Retry</string>
+    
+    <!-- Errors -->
+    <string name="error_unknown">An unknown error occurred: %1$s</string>
+    <string name="error_network">Network error: %1$d</string>
+    <string name="error_network_io">Network communication error. Please check your connection.</string>
+    <string name="error_no_internet">No internet connection. Please check your network settings.</string>
+    <string name="error_timeout">Request timed out. Please try again.</string>
+    <string name="error_server">Server error. Please try again later.</string>
+    <string name="error_unauthorized">Session expired. Please log in again.</string>
+    <string name="error_forbidden">You don't have permission to perform this action.</string>
+    <string name="error_not_found">The requested resource was not found.</string>
+    
+    <!-- Collection Errors -->
+    <string name="error_collection_not_found">Collection not found</string>
+    <string name="error_collection_exists">A collection with this name already exists</string>
+    <string name="error_collection_share_failed">Failed to share collection</string>
+    <string name="error_collection_follow_failed">Failed to follow collection</string>
+    
+    <!-- Success Messages -->
+    <string name="success_collection_created">Collection created successfully</string>
+    <string name="success_collection_updated">Collection updated successfully</string>
+    <string name="success_collection_deleted">Collection deleted successfully</string>
+    <string name="success_collection_shared">Collection shared successfully</string>
+    <string name="success_collection_followed">Collection followed successfully</string>
+    
+    <!-- UI Strings -->
+    <string name="collections">Collections</string>
+    <string name="shared_collections">Shared with me</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="search_bookmarks">Search bookmarks...</string>
+    <string name="filter_all">All</string>
+    <string name="filter_favorites">Favorites</string>
+    <string name="filter_archived">Archived</string>
+    <string name="no_bookmarks">No bookmarks yet</string>
+    <string name="no_bookmarks_description">Add a new bookmark by tapping the + button</string>
+    <string name="add_bookmark">Add Bookmark</string>
+    
+    <!-- Selection Mode -->
+    <string name="select">Select</string>
+    <string name="select_all">Select all</string>
+    <string name="deselect_all">Deselect all</string>
+    <string name="selected_count">%d selected</string>
+    <string name="cancel">Cancel</string>
+    
+    <!-- Bulk Actions -->
+    <string name="action_favorite">Favorite</string>
+    <string name="action_unfavorite">Remove from favorites</string>
+    <string name="action_archive">Archive</string>
+    <string name="action_unarchive">Unarchive</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_add_to_collection">Add to collection</string>
+    
+    <!-- Confirmation Dialogs -->
+    <string name="confirm_delete_title">Delete</string>
+    <string name="confirm_delete_message">Are you sure you want to delete this item?</string>
+    <plurals name="confirm_bulk_delete_message">
+        <item quantity="one">Are you sure you want to delete this item?</item>
+        <item quantity="other">Are you sure you want to delete %d items?</item>
+    </plurals>
+    <string name="create_collection">Create Collection</string>
+    <string name="edit_collection">Edit Collection</string>
+    <string name="delete_collection">Delete Collection</string>
+    <string name="share_collection">Share Collection</string>
+    <string name="unshare_collection">Stop Sharing</string>
+    <string name="follow_collection">Follow Collection</string>
+    <string name="unfollow_collection">Unfollow Collection</string>
+    <string name="confirm_delete_collection">Are you sure you want to delete this collection?</string>
+    <string name="confirm_unfollow_collection">Are you sure you want to unfollow this collection?</string>
+    
+    <!-- Bookmark Actions -->
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="archive">Archive</string>
+    <string name="unarchive">Unarchive</string>
+    <string name="delete_bookmark">Delete bookmark</string>
+    <string name="confirm_delete_bookmark">Delete Bookmark</string>
+    <string name="are_you_sure_delete_bookmark">Are you sure you want to delete this bookmark? This action cannot be undone.</string>
+    <string name="bookmark_deleted">Bookmark deleted</string>
+    <string name="bookmark_archived">Bookmark archived</string>
+    <string name="bookmark_unarchived">Bookmark unarchived</string>
+    <string name="bookmark_added_to_favorites">Added to favorites</string>
+    <string name="bookmark_removed_from_favorites">Removed from favorites</string>
+    <string name="copy_link">Copy link</string>
+    <string name="link_copied">Link copied to clipboard</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="share">Share</string>
+    <string name="edit_bookmark">Edit bookmark</string>
+    <string name="untitled">Untitled</string>
+    <string name="no_description">No description</string>
+    <string name="more_options">More options</string>
+    
+    <!-- Bookmark Detail Screen -->
+    <string name="bookmark_details">Bookmark Details</string>
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
+    <string name="title">Title</string>
+    <string name="url">URL</string>
+    <string name="description">Description</string>
+    <string name="add_a_description">Add a description</string>
+    <string name="tags">Tags</string>
+    <string name="add_tags_separated_by_commas">Add tags separated by commas</string>
+    <string name="no_tags">No tags</string>
+    <string name="details">Details</string>
+    <string name="created">Created</string>
+    <string name="last_updated">Last updated</string>
+    <string name="last_opened">Last opened</string>
+    <string name="never">Never</string>
+    <string name="times_opened">Times opened</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="failed_to_load_bookmark">Failed to load bookmark</string>
+    <string name="are_you_sure_you_want_to_delete_this_bookmark">Are you sure you want to delete this bookmark?</string>
+</resources>
