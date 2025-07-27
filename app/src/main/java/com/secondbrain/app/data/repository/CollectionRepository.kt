@@ -1,60 +1,83 @@
 package com.secondbrain.app.data.repository
 
-import com.secondbrain.app.data.model.BookmarkCollection
-import com.secondbrain.app.data.model.CollectionShareSettings
-import com.secondbrain.app.data.model.Result
+import com.secondbrain.app.data.database.dao.BookmarkDao
+import com.secondbrain.app.data.database.dao.CollectionDao
+import com.secondbrain.app.data.database.entities.CollectionEntity
+import com.secondbrain.app.data.model.Collection
 import kotlinx.coroutines.flow.Flow
-
+import kotlinx.coroutines.flow.map
 /**
- * Repository interface for collection-related operations including sharing functionality.
+ * Repository for collection operations.
  */
-interface CollectionRepository {
-    // Existing methods
-    suspend fun getCollections(): Flow<List<BookmarkCollection>>
+class CollectionRepository(
+    private val collectionDao: CollectionDao,
+    private val bookmarkDao: BookmarkDao
+) {
     
-    // Collection sharing methods
+    fun getAllCollections(): Flow<List<Collection>> {
+        return collectionDao.getAllCollections().map { entities ->
+            entities.map { it.toCollection() }
+        }
+    }
     
-    /**
-     * Updates the sharing settings for a collection.
-     * 
-     * @param collectionId The ID of the collection to update sharing settings for
-     * @param shareSettings The new sharing settings
-     * @return Result indicating success or failure
-     */
-    suspend fun updateSharingSettings(
-        collectionId: Long,
-        shareSettings: CollectionShareSettings
-    ): Result<Unit>
+    suspend fun getCollectionById(id: Long): Collection? {
+        return collectionDao.getCollectionById(id)?.toCollection()
+    }
     
-    /**
-     * Follows a shared collection using a share URL or ID.
-     * 
-     * @param userId The ID of the user who wants to follow the collection
-     * @param shareUrlOrId The share URL or ID of the collection to follow
-     * @return Result containing the followed collection or an error
-     */
-    suspend fun followSharedCollection(
-        userId: String,
-        shareUrlOrId: String
-    ): Result<BookmarkCollection>
+    suspend fun getCollectionByName(name: String): Collection? {
+        return collectionDao.getCollectionByName(name)?.toCollection()
+    }
     
-    /**
-     * Unfollows a previously followed shared collection.
-     * 
-     * @param userId The ID of the user who wants to unfollow the collection
-     * @param collectionId The ID of the shared collection to unfollow
-     * @return Result indicating success or failure
-     */
-    suspend fun unfollowSharedCollection(
-        userId: String,
-        collectionId: Long
-    ): Result<Unit>
+    suspend fun getDefaultCollection(): Collection? {
+        return collectionDao.getDefaultCollection()?.toCollection()
+    }
     
-    /**
-     * Retrieves all collections that have been shared with the current user.
-     * 
-     * @param userId The ID of the current user
-     * @return Flow emitting a list of shared collections
-     */
-    fun getSharedCollections(userId: String): Flow<List<BookmarkCollection>>
+    fun searchCollections(query: String): Flow<List<Collection>> {
+        return collectionDao.searchCollections(query).map { entities ->
+            entities.map { it.toCollection() }
+        }
+    }
+    
+    suspend fun insertCollection(collection: Collection): Long {
+        val entity = CollectionEntity.fromCollection(collection)
+        return collectionDao.insertCollection(entity)
+    }
+    
+    suspend fun updateCollection(collection: Collection) {
+        val entity = CollectionEntity.fromCollection(collection)
+        collectionDao.updateCollection(entity)
+    }
+    
+    suspend fun deleteCollection(collection: Collection) {
+        // First delete all bookmarks in this collection
+        bookmarkDao.deleteBookmarksByCollection(collection.id)
+        
+        // Then delete the collection
+        val entity = CollectionEntity.fromCollection(collection)
+        collectionDao.deleteCollection(entity)
+    }
+    
+    suspend fun deleteCollectionById(id: Long) {
+        // First delete all bookmarks in this collection
+        bookmarkDao.deleteBookmarksByCollection(id)
+        
+        // Then delete the collection
+        collectionDao.deleteCollectionById(id)
+    }
+    
+    suspend fun refreshBookmarkCount(id: Long) {
+        collectionDao.refreshBookmarkCount(id)
+    }
+    
+    suspend fun refreshAllBookmarkCounts() {
+        collectionDao.refreshAllBookmarkCounts()
+    }
+    
+    suspend fun getCollectionCount(): Int {
+        return collectionDao.getCollectionCount()
+    }
+    
+    suspend fun getBookmarkCountByCollection(collectionId: Long): Int {
+        return bookmarkDao.getBookmarkCountByCollection(collectionId)
+    }
 }

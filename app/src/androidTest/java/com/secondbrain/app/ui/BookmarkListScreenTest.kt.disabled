@@ -1,0 +1,276 @@
+package com.secondbrain.app.ui.bookmark
+
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.secondbrain.app.ui.theme.SecondBrainTheme
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class BookmarkListScreenTest {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun bookmarkListScreen_displaysBookmarks_whenLaunched() {
+        // When
+        composeTestRule.setContent {
+            SecondBrainTheme {
+                BookmarkListScreen(
+                    onNavigateToDetail = {},
+                    onNavigateToAdd = {}
+                )
+            }
+        }
+
+        // Then - Verify the app bar title is displayed
+        composeTestRule
+            .onNodeWithText("Bookmarks")
+            .assertIsDisplayed()
+            
+        // Verify the add button is displayed
+        composeTestRule
+            .onNodeWithContentDescription("Add Bookmark")
+            .assertIsDisplayed()
+            
+        // Verify some sample bookmarks are displayed
+        composeTestRule
+            .onNodeWithText("Second Brain Methodology")
+            .assertIsDisplayed()
+            
+        composeTestRule
+            .onNodeWithText("Zettelkasten Method")
+            .assertIsDisplayed()
+            
+        composeTestRule
+            .onNodeWithText("Obsidian")
+            .assertIsDisplayed()
+    }
+    
+    @Test
+    fun bookmarkListScreen_navigatesToDetail_whenBookmarkClicked() {
+        // Given
+        var navigatedToId: Long? = null
+        
+        // When
+        composeTestRule.setContent {
+            SecondBrainTheme {
+                BookmarkListScreen(
+                    onNavigateToDetail = { id -> navigatedToId = id },
+                    onNavigateToAdd = {}
+                )
+            }
+        }
+        
+        // When clicking on a bookmark
+        composeTestRule
+            .onNodeWithText("Second Brain Methodology")
+            .performClick()
+            
+        // Then
+        assert(navigatedToId == 1L)
+    }
+    
+    @Test
+    fun bookmarkListScreen_displaysBookmarkDetails() {
+        // When
+        composeTestRule.setContent {
+            SecondBrainTheme {
+                BookmarkListScreen(
+                    onNavigateToDetail = {},
+                    onNavigateToAdd = {}
+                )
+            }
+        }
+        
+        // Then - Verify bookmark details are displayed
+        composeTestRule
+            .onNodeWithText("Second Brain Methodology")
+            .assertIsDisplayed()
+            
+        composeTestRule
+            .onNodeWithText("https://fortelabs.co/blog/basboverview/")
+            .assertIsDisplayed()
+            
+        composeTestRule
+            .onNodeWithText("Building a Second Brain overview")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun bookmarkListScreen_navigatesToAdd_whenAddButtonClicked() {
+        // Given
+        var addButtonClicked = false
+        
+        // When
+        composeTestRule.setContent {
+            SecondBrainTheme {
+                BookmarkListScreen(
+                    onNavigateToDetail = {},
+                    onNavigateToAdd = { addButtonClicked = true }
+                )
+            }
+        }
+        
+        // When clicking the add button
+        composeTestRule
+            .onNodeWithContentDescription("Add Bookmark")
+            .performClick()
+            
+        // Then
+        assert(addButtonClicked)
+    }
+
+    @Test
+    fun bookmarkListScreen_clickActions_triggerCallbacks() {
+        // Given
+        val testBookmark = createTestBookmark(id = 1, title = "Clickable Bookmark")
+        val stateWithBookmarks = BookmarkUiState(
+            bookmarks = listOf(testBookmark),
+            isLoading = false,
+            isSelectionMode = false,
+            selectedBookmarks = emptySet(),
+            errorMessage = null,
+            searchQuery = ""
+        )
+        
+        var clickedBookmark: Bookmark? = null
+        var addBookmarkClicked = false
+
+        // When
+        composeTestRule.setContent {
+            SecondBrainTheme {
+                BookmarkListScreen(
+                    uiState = stateWithBookmarks,
+                    onBookmarkClick = { clickedBookmark = it },
+                    onBookmarkLongClick = {},
+                    onSearchQueryChange = {},
+                    onDeleteSelected = {},
+                    onToggleFavoriteSelected = {},
+                    onArchiveSelected = {},
+                    onClearSelection = {},
+                    onErrorDismiss = {},
+                    onAddBookmark = { addBookmarkClicked = true }
+                )
+            }
+        }
+
+        // Then - Click on bookmark
+        composeTestRule
+            .onNodeWithText("Clickable Bookmark")
+            .performClick()
+
+        assert(clickedBookmark?.id == 1L)
+
+        // Click add bookmark FAB
+        composeTestRule
+            .onNodeWithContentDescription("Add bookmark")
+            .performClick()
+
+        assert(addBookmarkClicked)
+    }
+
+    @Test
+    fun bookmarkListScreen_displaysErrorSnackbar_whenErrorOccurs() {
+        // Given
+        val errorState = BookmarkUiState(
+            bookmarks = emptyList(),
+            isLoading = false,
+            isSelectionMode = false,
+            selectedBookmarks = emptySet(),
+            errorMessage = "Test error message",
+            searchQuery = ""
+        )
+
+        // When
+        composeTestRule.setContent {
+            SecondBrainTheme {
+                BookmarkListScreen(
+                    uiState = errorState,
+                    onBookmarkClick = {},
+                    onBookmarkLongClick = {},
+                    onSearchQueryChange = {},
+                    onDeleteSelected = {},
+                    onToggleFavoriteSelected = {},
+                    onArchiveSelected = {},
+                    onClearSelection = {},
+                    onErrorDismiss = {},
+                    onAddBookmark = {}
+                )
+            }
+        }
+
+        // Then
+        composeTestRule
+            .onNodeWithText("Test error message")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun bookmarkListScreen_favoriteBookmarks_showFavoriteIcon() {
+        // Given
+        val favoriteBookmark = createTestBookmark(
+            id = 1,
+            title = "Favorite Bookmark",
+            isFavorite = true
+        )
+        val stateWithFavorite = BookmarkUiState(
+            bookmarks = listOf(favoriteBookmark),
+            isLoading = false,
+            isSelectionMode = false,
+            selectedBookmarks = emptySet(),
+            errorMessage = null,
+            searchQuery = ""
+        )
+
+        // When
+        composeTestRule.setContent {
+            SecondBrainTheme {
+                BookmarkListScreen(
+                    uiState = stateWithFavorite,
+                    onBookmarkClick = {},
+                    onBookmarkLongClick = {},
+                    onSearchQueryChange = {},
+                    onDeleteSelected = {},
+                    onToggleFavoriteSelected = {},
+                    onArchiveSelected = {},
+                    onClearSelection = {},
+                    onErrorDismiss = {},
+                    onAddBookmark = {}
+                )
+            }
+        }
+
+        // Then
+        composeTestRule
+            .onNodeWithContentDescription("Favorite")
+            .assertIsDisplayed()
+    }
+
+    private fun createTestBookmark(
+        id: Long = 1L,
+        collectionId: Long = 1L,
+        title: String = "Test Bookmark",
+        url: String = "https://example.com",
+        description: String? = "Test description",
+        isFavorite: Boolean = false,
+        isArchived: Boolean = false,
+        tags: List<String> = listOf("test")
+    ): Bookmark {
+        return Bookmark(
+            id = id,
+            collectionId = collectionId,
+            title = title,
+            url = url,
+            description = description,
+            isFavorite = isFavorite,
+            isArchived = isArchived,
+            tags = tags,
+            createdAt = Date(),
+            updatedAt = Date()
+        )
+    }
+}

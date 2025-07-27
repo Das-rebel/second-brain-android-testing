@@ -1,103 +1,168 @@
 package com.secondbrain.app.data.repository
 
-import com.secondbrain.app.domain.model.Bookmark
+import com.secondbrain.app.data.database.dao.BookmarkDao
+import com.secondbrain.app.data.database.dao.CollectionDao
+import com.secondbrain.app.data.database.entities.BookmarkEntity
+import com.secondbrain.app.data.model.Bookmark
+import com.secondbrain.app.util.WebMetadataExtractor
 import kotlinx.coroutines.flow.Flow
-
+import kotlinx.coroutines.flow.map
 /**
- * Repository interface for managing bookmarks.
+ * Repository for bookmark operations.
  */
-interface BookmarkRepository {
+class BookmarkRepository(
+    private val bookmarkDao: BookmarkDao,
+    private val collectionDao: CollectionDao,
+    private val webMetadataExtractor: WebMetadataExtractor
+) {
     
-    //region Local operations
+    fun getAllBookmarks(): Flow<List<Bookmark>> {
+        return bookmarkDao.getAllBookmarks().map { entities ->
+            entities.map { it.toBookmark() }
+        }
+    }
     
-    /**
-     * Gets all bookmarks for a specific collection.
-     */
-    fun getBookmarksByCollection(collectionId: Long): Flow<List<Bookmark>>
+    fun getBookmarksByCollection(collectionId: Long): Flow<List<Bookmark>> {
+        return bookmarkDao.getBookmarksByCollection(collectionId).map { entities ->
+            entities.map { it.toBookmark() }
+        }
+    }
     
-    /**
-     * Gets a bookmark by its ID.
-     */
-    suspend fun getBookmarkById(bookmarkId: Long): Result<Bookmark>
+    fun getFavoriteBookmarks(): Flow<List<Bookmark>> {
+        return bookmarkDao.getFavoriteBookmarks().map { entities ->
+            entities.map { it.toBookmark() }
+        }
+    }
     
-    /**
-     * Inserts a new bookmark.
-     */
-    suspend fun insertBookmark(bookmark: Bookmark): Result<Long>
+    fun getArchivedBookmarks(): Flow<List<Bookmark>> {
+        return bookmarkDao.getArchivedBookmarks().map { entities ->
+            entities.map { it.toBookmark() }
+        }
+    }
     
-    /**
-     * Updates an existing bookmark.
-     */
-    suspend fun updateBookmark(bookmark: Bookmark): Result<Unit>
+    suspend fun getBookmarkById(id: Long): Bookmark? {
+        return bookmarkDao.getBookmarkById(id)?.toBookmark()
+    }
     
-    /**
-     * Deletes a bookmark.
-     */
-    suspend fun deleteBookmark(bookmarkId: Long): Result<Unit>
+    suspend fun getBookmarkByUrl(url: String): Bookmark? {
+        return bookmarkDao.getBookmarkByUrl(url)?.toBookmark()
+    }
     
-    /**
-     * Marks a bookmark as favorite.
-     */
-    suspend fun toggleFavorite(bookmarkId: Long, isFavorite: Boolean): Result<Unit>
+    fun searchBookmarks(query: String): Flow<List<Bookmark>> {
+        return bookmarkDao.searchBookmarks(query).map { entities ->
+            entities.map { it.toBookmark() }
+        }
+    }
     
-    /**
-     * Archives a bookmark.
-     */
-    suspend fun archiveBookmark(bookmarkId: Long, isArchived: Boolean): Result<Unit>
+    fun getBookmarksByTag(tag: String): Flow<List<Bookmark>> {
+        return bookmarkDao.getBookmarksByTag(tag).map { entities ->
+            entities.map { it.toBookmark() }
+        }
+    }
     
-    /**
-     * Updates the last opened timestamp for a bookmark.
-     */
-    suspend fun updateLastOpened(bookmarkId: Long): Result<Unit>
+    suspend fun insertBookmark(bookmark: Bookmark): Long {
+        // If this is a new bookmark (id = 0), try to fetch metadata
+        val bookmarkToSave = if (bookmark.id == 0L && bookmark.url.isNotBlank()) {
+            try {
+                val metadata = webMetadataExtractor.extractMetadata(bookmark.url)
+                bookmark.copy(
+                    title = bookmark.title.ifBlank { metadata.title },
+                    description = bookmark.description ?: metadata.description.ifEmpty { null },
+                    domain = bookmark.domain ?: metadata.domain,
+                    faviconUrl = bookmark.faviconUrl ?: metadata.faviconUrl
+                )
+            } catch (e: Exception) {
+                // If metadata extraction fails, use the original bookmark
+                bookmark
+            }
+        } else {
+            bookmark
+        }
+        val entity = BookmarkEntity.fromBookmark(bookmarkToSave)
+        val id = bookmarkDao.insertBookmark(entity)
+        
+        // Update collection bookmark count if bookmark belongs to a collection
+        bookmark.collectionId?.let { collectionId ->
+            collectionDao.refreshBookmarkCount(collectionId)
+        }
+        
+        return id
+    }
     
-    /**
-     * Searches bookmarks by query.
-     */
-    fun searchBookmarks(query: String): Flow<List<Bookmark>>
+    suspend fun updateBookmark(bookmark: Bookmark) {
+        val entity = BookmarkEntity.fromBookmark(bookmark)
+        bookmarkDao.updateBookmark(entity)
+        
+        // Update collection bookmark count if bookmark belongs to a collection
+        bookmark.collectionId?.let { collectionId ->
+            collectionDao.refreshBookmarkCount(collectionId)
+        }
+    }
     
-    //endregion
+    suspend fun deleteBookmark(bookmark: Bookmark) {
+        val entity = BookmarkEntity.fromBookmark(bookmark)
+        bookmarkDao.deleteBookmark(entity)
+        
+        // Update collection bookmark count if bookmark belonged to a collection
+        bookmark.collectionId?.let { collectionId ->
+            collectionDao.refreshBookmarkCount(collectionId)
+        }
+    }
     
-    /**
-     * Gets all bookmarks from all collections.
-     */
-    fun getAllBookmarks(): Flow<List<Bookmark>>
+    suspend fun deleteBookmarkById(id: Long) {
+        val bookmark = getBookmarkById(id)
+        bookmarkDao.deleteBookmarkById(id)
+        
+        // Update collection bookmark count if bookmark belonged to a collection
+        bookmark?.collectionId?.let { collectionId ->
+            collectionDao.refreshBookmarkCount(collectionId)
+        }
+    }
     
-    /**
-     * Gets favorite bookmarks.
-     */
-    fun getFavoriteBookmarks(): Flow<List<Bookmark>>
+    suspend fun updateFavoriteStatus(id: Long, isFavorite: Boolean) {
+        bookmarkDao.updateFavoriteStatus(id, isFavorite)
+    }
     
-    /**
-     * Gets archived bookmarks.
-     */
-    fun getArchivedBookmarks(): Flow<List<Bookmark>>
+    suspend fun updateArchivedStatus(id: Long, isArchived: Boolean) {
+        bookmarkDao.updateArchivedStatus(id, isArchived)
+    }
     
-    /**
-     * Deletes multiple bookmarks.
-     */
-    suspend fun deleteBookmarks(bookmarkIds: List<Long>): Result<Unit>
+    suspend fun incrementOpenCount(id: Long) {
+        bookmarkDao.incrementOpenCount(id)
+    }
     
-    /**
-     * Toggles favorite status for multiple bookmarks.
-     */
-    suspend fun toggleFavoriteForMultiple(bookmarkIds: List<Long>, isFavorite: Boolean): Result<Unit>
+    suspend fun moveBookmarksToCollection(bookmarkIds: List<Long>, collectionId: Long?) {
+        // Get old collection IDs for updating counts
+        val oldCollectionIds = bookmarkIds.mapNotNull { id ->
+            getBookmarkById(id)?.collectionId
+        }.distinct()
+        
+        bookmarkDao.moveBookmarksToCollection(bookmarkIds, collectionId)
+        
+        // Update bookmark counts for affected collections
+        oldCollectionIds.forEach { oldCollectionId ->
+            collectionDao.refreshBookmarkCount(oldCollectionId)
+        }
+        collectionId?.let { newCollectionId ->
+            collectionDao.refreshBookmarkCount(newCollectionId)
+        }
+    }
     
-    /**
-     * Archives/unarchives multiple bookmarks.
-     */
-    suspend fun archiveMultipleBookmarks(bookmarkIds: List<Long>, isArchived: Boolean): Result<Unit>
+    suspend fun getBookmarkCount(): Int {
+        return bookmarkDao.getBookmarkCount()
+    }
     
-    //region Remote operations
+    suspend fun getFavoriteBookmarkCount(): Int {
+        return bookmarkDao.getFavoriteBookmarkCount()
+    }
     
-    /**
-     * Refreshes bookmarks for a collection from the remote server.
-     */
-    suspend fun refreshBookmarks(collectionId: Long)
+    suspend fun getArchivedBookmarkCount(): Int {
+        return bookmarkDao.getArchivedBookmarkCount()
+    }
     
-    /**
-     * Syncs local bookmarks with the remote server.
-     */
-    suspend fun syncBookmarks(collectionId: Long)
-    
-    //endregion
+    suspend fun getAllTags(): List<String> {
+        return bookmarkDao.getAllTags().flatMap { tagString ->
+            tagString.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        }.distinct().sorted()
+    }
 }

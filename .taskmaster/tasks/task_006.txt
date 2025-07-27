@@ -1,0 +1,11 @@
+# Task ID: 6
+# Title: Deployment
+# Status: todo
+# Dependencies: None
+# Priority: low
+# Description: Prepare for app store deployment
+# Details:
+
+
+# Test Strategy:
+

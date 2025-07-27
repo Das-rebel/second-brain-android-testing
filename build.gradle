@@ -1,4 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+
 buildscript {
     ext {
         // Kotlin
@@ -6,7 +7,7 @@ buildscript {
         kotlin_serialization_version = '1.6.0'
         
         // Android
-        agp_version = '8.2.2'  // Current stable version
+        agp_version = '8.2.0'  // Compatible with Android Gradle Plugin 8.2.0
         
         // DI
         hilt_version = '2.50'  // Using a stable version known to work well with Kotlin 1.9.x
@@ -15,8 +16,8 @@ buildscript {
         // Database
         room_version = '2.6.1'
         
-        // Compose - using the same version as the BOM
-        compose_compiler_version = '1.5.1'
+        // Compose - updated for Kotlin 1.9.22 compatibility
+        compose_compiler_version = '1.5.8'
         
         // Network
         okhttp_version = '4.12.0'
@@ -27,6 +28,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
         maven { url 'https://jitpack.io' }
     }
     
@@ -37,7 +39,16 @@ buildscript {
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
         // JUnit 5 support
         classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.9.3.0'
+        // Note: KSP would be preferred but using KAPT for compatibility
     }
+}
+
+plugins {
+    id 'com.android.application' version '8.2.0' apply false
+    id 'com.android.library' version '8.2.0' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
+    id 'com.google.devtools.ksp' version '1.9.22-1.0.16' apply false
+    id 'com.google.dagger.hilt.android' version '2.50' apply false
 }
 
 // Common test configuration
@@ -49,8 +60,8 @@ subprojects {
     tasks.withType(Test) {
         useJUnitPlatform()
         
-        // Set JVM arguments for tests
-        jvmArgs '-XX:MaxPermSize=512m', '-XX:+HeapDumpOnOutOfMemoryError'
+        // Set JVM arguments for tests (Java 17+ compatible)
+        jvmArgs '-XX:+HeapDumpOnOutOfMemoryError', '-XX:+UseG1GC', '-XX:MaxGCPauseMillis=200'
         
         // Enable parallel test execution
         maxParallelForks = Runtime.runtime.availableProcessors() > 1 ? 2 : 1
@@ -88,4 +99,9 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+// Apply JaCoCo plugin to all projects
+allprojects {
+    apply plugin: 'jacoco'
 }
