@@ -93,20 +93,94 @@
       {
         "id": 5,
         "title": "Testing",
-        "description": "Write unit and instrumentation tests",
+        "description": "Comprehensive testing infrastructure with 150+ tests across 4 frameworks (Espresso, Robolectric, UI Automator, Compose UI)",
         "status": "done",
         "priority": "medium",
         "createdAt": "2025-07-25T04:30:00+05:30",
-        "updatedAt": "2025-07-25T04:30:00+05:30"
+        "updatedAt": "2025-07-31T00:00:00+05:30"
       },
       {
         "id": 6,
         "title": "Deployment",
         "description": "Prepare for app store deployment",
-        "status": "todo",
+        "status": "in-progress",
         "priority": "low",
         "createdAt": "2025-07-25T04:30:00+05:30",
-        "updatedAt": "2025-07-25T04:30:00+05:30"
+        "updatedAt": "2025-07-31T00:00:00+05:30",
+        "subtasks": [
+          {
+            "id": "6.1",
+            "title": "App Store Metadata Preparation",
+            "description": "Play Store Metadata for production deployment",
+            "status": "todo",
+            "priority": "high",
+            "estimatedHours": 3,
+            "parentTaskId": 6,
+            "aiProvider": "cerebras",
+            "aiCost": 1.06e-05,
+            "generatedContent": "[Cerebras llama3.1-8b] Executed: \n            Create detailed app store metadata fo..."
+          },
+          {
+            "id": "6.2",
+            "title": "Build Configuration Preparation",
+            "description": "Build Configuration for production deployment",
+            "status": "todo",
+            "priority": "high",
+            "estimatedHours": 3,
+            "parentTaskId": 6,
+            "aiProvider": "cerebras",
+            "aiCost": 9.800000000000001e-06,
+            "generatedContent": "[Cerebras llama3.1-8b] Executed: \n            Generate production build configurati..."
+          },
+          {
+            "id": "6.3",
+            "title": "Testing Validation Preparation",
+            "description": "Testing Validation for production deployment",
+            "status": "todo",
+            "priority": "high",
+            "estimatedHours": 3,
+            "parentTaskId": 6,
+            "aiProvider": "cerebras",
+            "aiCost": 1.03e-05,
+            "generatedContent": "[Cerebras llama3.1-8b] Executed: \n            Create testing validation checklist f..."
+          },
+          {
+            "id": "6.4",
+            "title": "Performance Optimization Preparation",
+            "description": "Performance Optimization for production deployment",
+            "status": "todo",
+            "priority": "medium",
+            "estimatedHours": 2,
+            "parentTaskId": 6,
+            "aiProvider": "cerebras",
+            "aiCost": 9.900000000000002e-06,
+            "generatedContent": "[Cerebras llama3.1-8b] Executed: \n            Identify Android app performance opti..."
+          },
+          {
+            "id": "6.5",
+            "title": "Security & Privacy Preparation",
+            "description": "Security & Privacy for production deployment",
+            "status": "todo",
+            "priority": "medium",
+            "estimatedHours": 2,
+            "parentTaskId": 6,
+            "aiProvider": "cerebras",
+            "aiCost": 9.900000000000002e-06,
+            "generatedContent": "[Cerebras llama3.1-8b] Executed: \n            Define security and privacy complianc..."
+          },
+          {
+            "id": "6.6",
+            "title": "Release Documentation Preparation",
+            "description": "Release Documentation for production deployment",
+            "status": "todo",
+            "priority": "medium",
+            "estimatedHours": 2,
+            "parentTaskId": 6,
+            "aiProvider": "cerebras",
+            "aiCost": 9.4e-06,
+            "generatedContent": "[Cerebras llama3.1-8b] Executed: \n            Create release documentation requirem..."
+          }
+        ]
       },
       {
         "id": 7,
@@ -145,12 +219,13 @@
             "dependencies": [],
             "parentTaskId": 7
           }
-        ]
+        ],
+        "updatedAt": "2025-07-31T00:00:00+05:30"
       }
     ],
     "metadata": {
       "created": "2025-07-25T00:03:09.598Z",
-      "updated": "2025-07-26T13:35:39.029Z",
+      "updated": "2025-07-31T00:00:00.000Z",
       "description": "Tasks for master context"
     }
   }
