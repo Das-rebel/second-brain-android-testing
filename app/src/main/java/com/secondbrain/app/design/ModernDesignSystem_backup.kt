@@ -32,15 +32,15 @@ object SparkThreadDesign {
         
         // Secondary Colors - Muted Paper Tones  
         val Secondary = Color(0xFFF2F0EA)       // Soft paper (hsl(45, 25%, 92%))
-        val SecondaryForeground = Color(0xFF493E36) // Medium brown ink on paper // Ink on soft paper
+        val SecondaryForeground = Color(0xFF1A1412) // Ink on soft paper
         
         // Muted Colors - Subtle Washi Tones
         val Muted = Color(0xFFF2F0EA)           // Muted paper
         val MutedForeground = Color(0xFF6B645C) // Faded ink (hsl(45, 10%, 40%))
         
         // Accent Colors - Traditional Japanese Palette
-        val Accent = Color(0xFFDB7079)        // Traditional red seal accent          // Accent paper
-        val AccentForeground = Color(0xFFF9F8F5) // Light cream on red accent // Ink on accent
+        val Accent = Color(0xFFF2F0EA)          // Accent paper
+        val AccentForeground = Color(0xFF1A1412) // Ink on accent
         
         // Destructive Colors - Seal Red
         val Destructive = Color(0xFFDC2626)     // Traditional seal red
@@ -53,8 +53,8 @@ object SparkThreadDesign {
         
         // Special Japanese Colors
         val Sakura = Color(0xFFE2A3A3)          // Cherry blossom pink
-        val Bamboo = Color(0xFF568F56)      // Darker forest bamboo green          // Bamboo green  
-        val Gold = Color(0xFFF0D175)        // Lighter traditional gold            // Traditional gold
+        val Bamboo = Color(0xFF8FBC8F)          // Bamboo green  
+        val Gold = Color(0xFFD4AF37)            // Traditional gold
         val Washi = Color(0xFFF7F3E9)           // Washi paper texture
         val Ink = Color(0xFF1A202C)             // Pure ink black
         val SealRed = Color(0xFFB85450)         // Seal stamp red
